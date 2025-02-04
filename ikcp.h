@@ -267,7 +267,7 @@ typedef struct IQUEUEHEAD iqueue_head;
 //=====================================================================
 struct IKCPSEG
 {
-	struct IQUEUEHEAD node; // 用于将该 Segment 链入队列
+    struct IQUEUEHEAD node; // 用于将该 Segment 链入队列
 	// 以下字段会被编码 除去data有24字节
     IUINT32 conv;           // 会话标识符（Conversation ID）
     IUINT32 cmd;            // 命令类型，4种类型，data包：应用数据   ack包：告诉发送方收到某个data包   询问对方的接收窗口大小    告诉对方自己的接收窗口大小
@@ -277,7 +277,7 @@ struct IKCPSEG
     IUINT32 sn;             // 序号，data类型：来自kcp->snd_nxt自增； ack类型：确认收到的data包序号；只为data包服务
     IUINT32 una;            // 下一个按序接收的序号，所有类型（4种）的包都有该字段值，值为 kcp->rcv_nxt, 告诉发送方 sn < una 的包都已收到
     IUINT32 len;            // 数据部分的长度，仅仅data包有效
-	char data[1];           // 数据缓冲区，仅仅data包有效
+    char data[1];           // 数据缓冲区，仅仅data包有效
 	// 以下字段不会被编码
     IUINT32 resendts;       // 下次重传时间戳（Resend Timestamp），在flush中判断超时重传，根据 rto 字段计算
     IUINT32 rto;            // 重传超时（Retransmission Timeout），这是时间段，首次发送时由 kcp->rx_rto 赋值, 重传时根据nodelay模式选择不同公式增长（详细见代码）
