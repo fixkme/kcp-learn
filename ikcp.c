@@ -1091,6 +1091,7 @@ void ikcp_flush(ikcpcb *kcp)
             segment->xmit++;
             kcp->xmit++;
             if (kcp->nodelay == 0) {
+                // 2 倍增长  rto = rto + rto
                 segment->rto += _imax_(segment->rto, (IUINT32)kcp->rx_rto);
             }	else {
                 // 1.5 倍增长 rto = rto + rto / 2
