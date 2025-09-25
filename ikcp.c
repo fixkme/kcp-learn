@@ -625,7 +625,7 @@ static void ikcp_parse_una(ikcpcb *kcp, IUINT32 una)
     }
 }
 
-// 更新 snd_buf 所有 seg 的 fastack
+// 更新 snd_buf 符合条件的seg 的 fastack
 static void ikcp_parse_fastack(ikcpcb *kcp, IUINT32 sn, IUINT32 ts)
 {
     struct IQUEUEHEAD *p, *next;
