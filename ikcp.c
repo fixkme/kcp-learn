@@ -811,16 +811,19 @@ int ikcp_input(ikcpcb *kcp, const char *data, long size)
             cmd != IKCP_CMD_WASK && cmd != IKCP_CMD_WINS) 
             return -3;
 
-        kcp->rmt_wnd = wnd;
-        ikcp_parse_una(kcp, una);
-        ikcp_shrink_buf(kcp);
+        kcp->rmt_wnd = wnd; // 记录对方的接收窗口大小
+        ikcp_parse_una(kcp, una); // 从 kcp->snd_buf 删除 seg.sn < una
+        ikcp_shrink_buf(kcp); // 根据kcp->snd_buf 更新 kcp->snd_una
 
         if (cmd == IKCP_CMD_ACK) {
             if (_itimediff(kcp->current, ts) >= 0) {
+                // 更新超时重传时间 kcp->rx_rto
                 ikcp_update_ack(kcp, _itimediff(kcp->current, ts));
             }
-            ikcp_parse_ack(kcp, sn);
-            ikcp_shrink_buf(kcp);
+            ikcp_parse_ack(kcp, sn); // 根据确认的包序号从 kcp->snd_buf 删除
+            ikcp_shrink_buf(kcp); // 根据kcp->snd_buf 更新 kcp->snd_una
+
+            // 得到 maxack 用于更新 send_buf 里的seg.fastack
             if (flag == 0) {
                 flag = 1;
                 maxack = sn;
@@ -851,6 +854,7 @@ int ikcp_input(ikcpcb *kcp, const char *data, long size)
                     "input psh: sn=%lu ts=%lu", (unsigned long)sn, (unsigned long)ts);
             }
             if (_itimediff(sn, kcp->rcv_nxt + kcp->rcv_wnd) < 0) {
+               // 将待发送的ack号追加到kcp->acklist中，会在ikcp_flush中发送出去
                 ikcp_ack_push(kcp, sn, ts);
                 if (_itimediff(sn, kcp->rcv_nxt) >= 0) {
                     seg = ikcp_segment_new(kcp, len);
@@ -866,7 +870,8 @@ int ikcp_input(ikcpcb *kcp, const char *data, long size)
                     if (len > 0) {
                         memcpy(seg->data, data, len);
                     }
-
+                    // 如果rcv_buf没有这个sn的seg，则添加到rcv_buf中
+					     // 如果rcv_queue还有剩余接收窗口，则（按序rcv_nxt）从 rcv_buf 移入 rcv_queue
                     ikcp_parse_data(kcp, seg);
                 }
             }
@@ -896,6 +901,7 @@ int ikcp_input(ikcpcb *kcp, const char *data, long size)
     }
 
     if (flag != 0) {
+        // 更新 snd_buf seg 的 fastack
         ikcp_parse_fastack(kcp, maxack, latest_ts);
     }
 
