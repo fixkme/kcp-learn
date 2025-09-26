@@ -723,7 +723,7 @@ void ikcp_parse_data(ikcpcb *kcp, IKCPSEG *newseg)
             repeat = 1;
             break;
         }
-        if (_itimediff(sn, seg->sn) > 0) {
+        if (_itimediff(sn, seg->sn) > 0) {  // 保证rcv_buf seg.sn是升序
             break;
         }
     }
@@ -731,7 +731,7 @@ void ikcp_parse_data(ikcpcb *kcp, IKCPSEG *newseg)
     if (repeat == 0) {
         // 加入 rcv_buf 
         iqueue_init(&newseg->node);
-        iqueue_add(&newseg->node, p);
+        iqueue_add(&newseg->node, p); // 在p后面插入，保证rcv_buf seg.sn是升序
         kcp->nrcv_buf++;
     }	else {
         ikcp_segment_delete(kcp, newseg);
