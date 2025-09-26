@@ -324,10 +324,10 @@ struct IKCPCB
     IUINT32 probe_wait; // 探查窗口需要等待的时间
 
     // 4个队列
-       struct IQUEUEHEAD snd_queue; // 待发送的数据队列，上层应用发送的数据
-    struct IQUEUEHEAD rcv_queue; // sn有序递增，已收到，提供给上层应用读取的包队列（还未合并分片），影响接收窗口大小，长度为 nrcv_que， rcv_wnd - nrcv_que = 自己的接收窗口
+    struct IQUEUEHEAD snd_queue; // 待发送的数据队列，上层应用发送的数据
+    struct IQUEUEHEAD rcv_queue; // sn升序且连续，已收到，提供给上层应用读取的包队列（还未合并分片），影响接收窗口大小，长度为 nrcv_que， rcv_wnd - nrcv_que = 自己的接收窗口
     struct IQUEUEHEAD snd_buf;   // 发送缓冲区，都是data包，来自snd_queue，已发送（udp sendto）但还未确认；
-    struct IQUEUEHEAD rcv_buf;   // 接收缓冲区，输入为下层协议的数据（ikcp_input里处理），输出为上层协议数据 rcv_queue 
+    struct IQUEUEHEAD rcv_buf;   // 升序，接收缓冲区，输入为下层协议的数据（ikcp_input里处理），输出为上层协议数据 rcv_queue 
     IUINT32 nrcv_buf;  // rcv_buf的包数量
     IUINT32 nsnd_buf;  // snd_buf的数量
     IUINT32 nrcv_que;  // rcv_queue的包数量    rcv_wnd - nrcv_que = 自己的接收窗口
